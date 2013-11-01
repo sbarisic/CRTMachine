@@ -28,7 +28,44 @@ namespace CRTMachine {
 		}
 	}
 
-	[Serializable]
+	internal class Memory : TextRenderer {
+		private byte[] memory;
+
+		public byte this[long i] {
+			get {
+				if (i < 0 || i > memory.Length)
+					throw new Exception(string.Format("Memory read from {0}", i));
+
+				return memory[i];
+			}
+			set {
+				if (i < 0 || i > memory.Length)
+					throw new Exception(string.Format("Memory write to {0}", i));
+
+				memory[i] = value;
+			}
+		}
+
+		public Memory(uint W, uint H) {
+			memory = new byte[W * H * 3];
+			Width = W;
+			Height = H;
+		}
+
+		public void Clear() {
+			memory = new byte[memory.Length];
+		}
+
+		public override void Set(int x, int y, Character character, bool blend = true) {
+			throw new NotImplementedException();
+		}
+
+		public override Character Get(int x, int y) {
+			var cell = (y * Width + x) * 3;
+			return new Character(memory[cell], memory[cell + 1], memory[cell + 2]);
+		}
+	}
+
 	public class Machine {
 		const int Width = 60;
 		const int Height = 30;
@@ -37,11 +74,13 @@ namespace CRTMachine {
 		public RenderWindow Window;
 
 		Shader CRT;
-		RenderTexture RT;
-		Sprite RTSprite;
+		RenderTexture Render;
+		Sprite RenderSprite;
 
 		internal CRT.Config Cfg;
 		ASMS ASMScript;
+		internal Memory VMem;
+		CRT.System Sys;
 
 		public Machine() {
 			TextDisplay = new TextDisplay(Width, Height);
@@ -58,8 +97,8 @@ namespace CRTMachine {
 			Window.SetFramerateLimit(60);
 
 			CRT = new Shader("shaders/empty.vert", "shaders/CRT.frag");
-			RT = new RenderTexture(Window.Size.X, Window.Size.Y);
-			RTSprite = new Sprite(RT.Texture);
+			Render = new RenderTexture(Window.Size.X, Window.Size.Y);
+			RenderSprite = new Sprite(Render.Texture);
 
 			Window.Closed += (sender, e) => {
 				Window.Close();
@@ -71,10 +110,21 @@ namespace CRTMachine {
 
 		public void Init() {
 			Cfg = new CRT.Config();
-
-			
+			VMem = new Memory(TextDisplay.Width, TextDisplay.Height);
+			Sys = new global::CRT.System(this);
 
 			ASMScript = new ASMS("Script");
+			ASMScript.OpcodeList.Add("SETPOS", (A) => {
+				Sys.M.Cfg.X = (int) A[0];
+				Sys.M.Cfg.Y = (int) A[1];
+				return null;
+			});
+			ASMScript.OpcodeList.Add("PRINT", (A) => {
+				if (A != null) foreach (var I in A) if (I != null) Sys.print(I.ToString());
+				return null;
+			});
+
+			ASMScript.LoadFile("main.asms");
 		}
 
 		public int StringToColor(string S) {
@@ -88,39 +138,23 @@ namespace CRTMachine {
 		public void Run() {
 			Window.DispatchEvents();
 			T += .01f;
-
-			RT.Clear(new Color(0, 0, 0, 0));
-			StartShader();
-			RTSprite.Draw(RT, RenderStates.Default);
-			StartShader(false);
-			RT.Display();
-
-			Window.Clear(Color.Black);
-
 			TextDisplay.Clear(Character.Transparent);
-
-			try {
-
-			} catch (Exception E) {
-				Console.Beep();
-				Console.WriteLine("\nLua error:");
-				Console.WriteLine(E.Message);
-				Console.ReadLine();
-			}
-
-
-			TextDisplay.Draw(Window, new Vector2f(0, 0));
-			RTSprite.Draw(Window, RenderStates.Default);
-
+			TextDisplay.DrawImage(0, 0, VMem);
+			TextDisplay.Draw(Render, new Vector2f(0, 0));
+			Render.Display();
+			StartShader(true);
+			RenderSprite.Draw(Render, RenderStates.Default);
+			StartShader(false);
+			RenderSprite.Draw(Window, RenderStates.Default);
 			Window.Display();
 		}
 
 		public void StartShader(bool DoStart = true) {
+			if (!Cfg.ShaderEnabled) return;
 			if (DoStart) {
+				CRT.SetParameter("texture", Shader.CurrentTexture);
 				CRT.SetParameter("time", T);
-				CRT.SetParameter("R", Cfg.R);
-				CRT.SetParameter("G", Cfg.G);
-				CRT.SetParameter("B", Cfg.B);
+				CRT.SetParameter("resolution", Render.DefaultView.Size);
 				Shader.Bind(CRT);
 			} else {
 				Shader.Bind(null);
