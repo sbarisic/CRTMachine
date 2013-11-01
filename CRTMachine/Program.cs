@@ -10,16 +10,10 @@ using SFML;
 using SFML.Window;
 using SFML.Audio;
 
-using CSScriptLibrary;
-using System.Security;
-using System.Security.Policy;
-using System.Security.Permissions;
-using System.Security.Principal;
-using System.Threading;
-
 using System.Reflection;
 using System.Runtime.Remoting;
 
+using ASMScript;
 
 namespace CRTMachine {
 	class Program {
@@ -47,7 +41,7 @@ namespace CRTMachine {
 		Sprite RTSprite;
 
 		internal CRT.Config Cfg;
-		AsmHelper MainHelper;
+		ASMS ASMScript;
 
 		public Machine() {
 			TextDisplay = new TextDisplay(Width, Height);
@@ -76,12 +70,11 @@ namespace CRTMachine {
 		}
 
 		public void Init() {
-			AsmHelper ConfigHelper = new AsmHelper(CSScript.Compile("Script/config.cs", "CRTMachine.exe"), null, true);
-			Cfg = new global::CRT.Config();
-			ConfigHelper.Invoke("*.Main", Cfg);
+			Cfg = new CRT.Config();
 
-			MainHelper = new AsmHelper(CSScript.Compile("Script/main.cs", "CRTMachine.exe"), null, true);
-			MainHelper.Invoke("*.Main", Cfg, new CRT.System(this));
+			
+
+			ASMScript = new ASMS("Script");
 		}
 
 		public int StringToColor(string S) {
@@ -107,7 +100,7 @@ namespace CRTMachine {
 			TextDisplay.Clear(Character.Transparent);
 
 			try {
-				MainHelper.Invoke("*.Run");
+
 			} catch (Exception E) {
 				Console.Beep();
 				Console.WriteLine("\nLua error:");

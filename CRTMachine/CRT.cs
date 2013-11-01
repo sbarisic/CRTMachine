@@ -4,15 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using CSScriptLibrary;
-using System.Security;
-using System.Security.Permissions;
-using System.Security.Principal;
-using System.Threading;
 using CRTMachine;
 
 namespace CRT {
-	[Serializable]
 	public class System {
 		internal Machine M;
 
@@ -30,7 +24,6 @@ namespace CRT {
 		}
 	}
 
-	[Serializable]
 	public class Config {
 		public float R, G, B;
 		public int Foreground = (int) ConsoleColor.Gray;

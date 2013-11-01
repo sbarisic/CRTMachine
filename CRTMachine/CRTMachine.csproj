@@ -32,12 +32,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CSScriptLibrary">
-      <HintPath>..\CSScriptLibrary.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.CSharp">
-      <HintPath>..\Mono.CSharp.dll</HintPath>
-    </Reference>
     <Reference Include="sfmlnet-audio-2">
       <HintPath>C:\Users\cartm_000\Desktop\_Libraries\SFML 2 .NET\lib\sfmlnet-audio-2.dll</HintPath>
     </Reference>
@@ -61,6 +55,11 @@
     <Compile Include="CRT.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Texter\Character.cs" />
     <Compile Include="Texter\TextDisplay.cs" />
     <Compile Include="Texter\TextEffect.cs" />
@@ -70,12 +69,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <Content Include="Script\main.cs">
+    <None Include="Script\main.asms">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Script\config.cs">
+    </None>
+    <None Include="Script\config.asms">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </None>
     <None Include="Data\texter.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -114,6 +113,18 @@
     <Content Include="openal32.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ASMScript\ASMScript.csproj">
+      <Project>{c010ae24-f8dd-4fa1-88d8-d17f4c68eb2c}</Project>
+      <Name>ASMScript</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
