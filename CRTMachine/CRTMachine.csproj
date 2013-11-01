@@ -32,14 +32,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DynamicLua">
-      <HintPath>C:\Users\cartm_000\Desktop\_Libraries\Dynamic Lua\DynamicLua.dll</HintPath>
+    <Reference Include="CSScriptLibrary">
+      <HintPath>..\CSScriptLibrary.dll</HintPath>
     </Reference>
-    <Reference Include="lua">
-      <HintPath>C:\Users\cartm_000\Desktop\_Libraries\Dynamic Lua\lua.dll</HintPath>
-    </Reference>
-    <Reference Include="LuaInterface">
-      <HintPath>C:\Users\cartm_000\Desktop\_Libraries\Dynamic Lua\LuaInterface.dll</HintPath>
+    <Reference Include="Mono.CSharp">
+      <HintPath>..\Mono.CSharp.dll</HintPath>
     </Reference>
     <Reference Include="sfmlnet-audio-2">
       <HintPath>C:\Users\cartm_000\Desktop\_Libraries\SFML 2 .NET\lib\sfmlnet-audio-2.dll</HintPath>
@@ -52,6 +49,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -59,6 +58,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CRT.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Texter\Character.cs" />
@@ -70,12 +70,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="main.lua">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="config.lua">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <Content Include="Script\main.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Script\config.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="Data\texter.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -92,7 +92,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <Content Include="csfml-audio-2.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -10,18 +10,21 @@ using SFML;
 using SFML.Window;
 using SFML.Audio;
 
-using DynamicLua;
+using CSScriptLibrary;
+using System.Security;
+using System.Security.Policy;
+using System.Security.Permissions;
+using System.Security.Principal;
+using System.Threading;
+
+using System.Reflection;
+using System.Runtime.Remoting;
+
 
 namespace CRTMachine {
 	class Program {
-		public static DynamicLua.DynamicLua Lua;
-		public static dynamic DLua;
-
 		static void Main(string[] args) {
 			Console.Title = "CRTConsole";
-
-			Lua = new DynamicLua.DynamicLua();
-			DLua = Lua;
 
 			Machine M = new Machine();
 			while (M.Window.IsOpen()) {
@@ -31,18 +34,20 @@ namespace CRTMachine {
 		}
 	}
 
-	class Machine {
+	[Serializable]
+	public class Machine {
 		const int Width = 60;
 		const int Height = 30;
 
-		TextDisplay TextDisplay;
+		internal TextDisplay TextDisplay;
 		public RenderWindow Window;
 
 		Shader CRT;
 		RenderTexture RT;
 		Sprite RTSprite;
 
-		float R, G, B;
+		internal CRT.Config Cfg;
+		AsmHelper MainHelper;
 
 		public Machine() {
 			TextDisplay = new TextDisplay(Width, Height);
@@ -67,18 +72,16 @@ namespace CRTMachine {
 				Environment.Exit(0);
 			};
 
-			Program.Lua.DoFile("config.lua");
-			R = (float) (Program.DLua.R != null ? Program.DLua.R : 0);
-			G = (float) (Program.DLua.G != null ? Program.DLua.G : 0);
-			B = (float) (Program.DLua.B != null ? Program.DLua.B : 0);
+			Init();
+		}
 
-			Program.DLua.print = new Action<string>((S) => {
-				TextDisplay.DrawText(CX, CY, S, new Character(foreground: Foreground, background: Background));
-			});
+		public void Init() {
+			AsmHelper ConfigHelper = new AsmHelper(CSScript.Compile("Script/config.cs", "CRTMachine.exe"), null, true);
+			Cfg = new global::CRT.Config();
+			ConfigHelper.Invoke("*.Main", Cfg);
 
-			Program.DLua.setforeground = new Action<string>((C) => { Foreground = StringToColor(C); });
-			Program.DLua.setbackground = new Action<string>((C) => { Background = StringToColor(C); });
-			Program.DLua.setpos = new Action<int, int>((X, Y) => { CX = X; CY = Y; });
+			MainHelper = new AsmHelper(CSScript.Compile("Script/main.cs", "CRTMachine.exe"), null, true);
+			MainHelper.Invoke("*.Main", Cfg, new CRT.System(this));
 		}
 
 		public int StringToColor(string S) {
@@ -86,10 +89,6 @@ namespace CRTMachine {
 			if (Enum.TryParse<ConsoleColor>(S.Trim(), true, out C)) return (int) C;
 			return 0;
 		}
-
-		int Foreground = (int) ConsoleColor.Gray;
-		int Background = (int) ConsoleColor.Black;
-		int CX, CY;
 
 		float T;
 
@@ -107,13 +106,8 @@ namespace CRTMachine {
 
 			TextDisplay.Clear(Character.Transparent);
 
-			/*TextDisplay.DrawText(0, 0, "Hello, world!", new Character(foreground: (int) ConsoleColor.White));
-			TextDisplay.DrawText(0, 1, "Hello, world!", new Character(foreground: (int) ConsoleColor.Green));
-			TextDisplay.DrawText(0, 2, "Hello, world!", new Character(foreground: (int) ConsoleColor.Red));
-			TextDisplay.DrawText(0, 3, "Hello, world!", new Character(foreground: (int) ConsoleColor.Blue));*/
-
 			try {
-				Program.Lua.DoFile("main.lua");
+				MainHelper.Invoke("*.Run");
 			} catch (Exception E) {
 				Console.Beep();
 				Console.WriteLine("\nLua error:");
@@ -131,9 +125,9 @@ namespace CRTMachine {
 		public void StartShader(bool DoStart = true) {
 			if (DoStart) {
 				CRT.SetParameter("time", T);
-				CRT.SetParameter("R", R);
-				CRT.SetParameter("G", G);
-				CRT.SetParameter("B", B);
+				CRT.SetParameter("R", Cfg.R);
+				CRT.SetParameter("G", Cfg.G);
+				CRT.SetParameter("B", Cfg.B);
 				Shader.Bind(CRT);
 			} else {
 				Shader.Bind(null);
