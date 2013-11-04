@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace CRTMachine.Texter {
 	public abstract class TextRenderer {
 		public const string SingleBox = "\xDA\xC4\xBF\xB3 \xB3\xC0\xC4\xD9";

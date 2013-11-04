@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using SFML.Graphics;
+﻿using SFML.Graphics;
 using SFML.Window;
+using System.IO;
 
 namespace CRTMachine.Texter {
 	public class TextDisplay : TextRenderer {

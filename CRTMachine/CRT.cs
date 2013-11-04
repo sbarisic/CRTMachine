@@ -1,57 +1,95 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using CRTMachine;
+using System;
 using System.Text;
-using System.Threading.Tasks;
-using System.Linq;
-
-using CRTMachine;
+using System.IO;
 
 namespace CRT {
 	public class System {
-		internal Machine M;
+		internal Machine Machine;
+		internal bool IsReading, IsReadingKey;
+		internal char InputChar;
+		internal int InputKey;
 
 		public System(Machine M) {
-			this.M = M;
+			this.Machine = M;
 		}
 
-		public void putchr(char c, bool DontIncreateCursor = false) {
-			bool Newline = false;
+		public void _Dbg_string(string S) {
+			StringBuilder SBldr = new StringBuilder();
+			foreach (var chr in S) {
+				SBldr.Append("0x");
+				SBldr.Append((byte) chr);
+				SBldr.Append(" ");
+			}
+			Console.WriteLine("{0}", SBldr.ToString().Trim());
+		}
+
+		public void delete() {
+			uint OldPos = Machine.VMem.CaretPosition;
+			putchr(' ');
+			Machine.VMem.CaretPosition = OldPos;
+			Machine.VMem.CaretX++;
+		}
+
+		public char read() {
+			IsReading = true;
+			while (IsReading) ;
+			return InputChar;
+		}
+
+		public int readkey() {
+			IsReadingKey = true;
+			while (IsReadingKey) ;
+			return InputKey;
+		}
+
+		public void read(char c) {
+			if (IsReading) {
+				InputChar = c;
+				putchr(c);
+				IsReading = false;
+			}
+		}
+
+		public void read(int c) {
+			if (IsReadingKey) {
+				InputKey = c;
+				IsReadingKey = false;
+			}
+		}
+
+		internal void putchr(char c) {
+			//_Dbg_string(c.ToString());
 			switch (c) {
+				case (char) 13:
 				case '\n':
-					Newline = true;
-					break;
-				default:
-					long Cell = (M.Cfg.Y * M.VMem.Width + M.Cfg.X) * 3;
-					M.VMem[Cell] = (byte) c;
-					M.VMem[Cell + 1] = (byte) M.Cfg.Foreground;
-					M.VMem[Cell + 2] = (byte) M.Cfg.Background;
-					break;
+					Machine.VMem.CaretY++;
+					Machine.VMem.CaretX = 0;
+					return;
+				case '\t':
+					for (int i = 0; i < 4; i++)
+						putchr(' ');
+					return;
+				case '\b':
+					Machine.VMem.CaretX--;
+					putchr('\0');
+					Machine.VMem.CaretX--;
+					return;
 			}
-
-			if (!DontIncreateCursor) {
-				if (!Newline)
-					M.Cfg.X++;
-				if (M.Cfg.X >= M.VMem.Width || Newline) {
-					M.Cfg.X = 0;
-					M.Cfg.Y++;
-				}
-				if (M.Cfg.Y >= M.VMem.Height)
-					M.Cfg.Y = 0;
-			}
+			uint Cell = Machine.VMem.CaretPosition * 3;
+			Machine.VMem[Cell] = (byte) c;
+			Machine.VMem[Cell + 1] = (byte) Machine.Cfg.Foreground;
+			Machine.VMem[Cell + 2] = (byte) Machine.Cfg.Background;
+			Machine.VMem.CaretX++;
 		}
 
-		public void print(string Str) {
-			string S = Str.Replace(@"\n", "\n").Replace(@"\t", "    ");
-			for (int i = 0; i < S.Length; i++) {
-				bool IncCursor = false;
-				if (i + 1 < S.Length) IncCursor = S[i + 1] == '\n';
-				putchr(S[i], IncCursor);
-			}
+		public void print(string S) {
+			for (int i = 0; i < S.Length; i++)
+				putchr(S[i]);
 		}
 
 		public void clear() {
-			M.VMem.Clear();
+			Machine.VMem.Clear();
 		}
 	}
 
@@ -59,11 +97,13 @@ namespace CRT {
 		public bool ShaderEnabled = false;
 		public int Foreground = (int) ConsoleColor.Gray;
 		public int Background = (int) ConsoleColor.Black;
-		public int X, Y;
+		public uint Width, Height;
+		public double CaretBlinkTime = 400;
 
 		public Config() {
 			ShaderEnabled = true;
-			X = Y = 0;
+			Width = 70;
+			Height = 25;
 		}
 	}
 }
