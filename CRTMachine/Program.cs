@@ -68,10 +68,6 @@ namespace CRTMachine {
 			/*Window.GainedFocus += (S, E) => { IsFocused = true; };
 			Window.LostFocus += (S, E) => { IsFocused = false; };*/
 
-			Init();
-		}
-
-		public void Init() {
 			CaretShape = new RectangleShape(new Vector2f(6, 2));
 			VMem = new Memory(TextDisplay.Width, TextDisplay.Height);
 			Sys = new global::CRT.System(this);
@@ -91,18 +87,14 @@ namespace CRTMachine {
 			//TEST_THREAD.Start();
 
 			Lua.Initialize();
-			Lua.Remove("string", "xpcall", "package", "os", "loadfile", "error", "load", "setfenv", "dofile", "_VERSION", "loadstring", "gcinfo", "select", "coroutine", "table", "pcall", "debug", "math", "luanet", "module", "rawequal", "io", "assert",  "getfenv", "require");
+			//Lua.Remove("string", "xpcall", "package", "os", "loadfile", "error", "load", "setfenv", "dofile", "_VERSION", "loadstring", "gcinfo", "select", "coroutine", "table", "pcall", "debug", "math", "luanet", "module", "rawequal", "io", "assert",  "getfenv", "require");
+			// TODO: Fix
 
 			Lua.LoadLibs(Sys);
-
-			Lua.DoFile("Script/bios.lua");
-
-			new System.Threading.Thread(() => {
-				while (true) {
-					Console.Write(">");
-					Lua.DoString(Console.ReadLine());
-				}
-			}).Start();
+			Lua.Register("system.run", (T) => {
+				Run();
+				return null;
+			});
 		}
 
 		void TextEntered(object sender, TextEventArgs e) {
@@ -132,6 +124,9 @@ namespace CRTMachine {
 					break;
 				case Keyboard.Key.Delete:
 					Sys.delete();
+					break;
+				case Keyboard.Key.F1:
+					Cfg.ShaderEnabled = !Cfg.ShaderEnabled;
 					break;
 			}
 			Sys.read((int) e.Code);
@@ -163,6 +158,16 @@ namespace CRTMachine {
 			StartShader(false);
 			RenderSprite.Draw(Window, RenderStates.Default);
 			Window.Display();
+
+			RunOnce();
+		}
+
+		bool DID_RUN = false;
+		public void RunOnce() {
+			if (DID_RUN)
+				return;
+			DID_RUN = true;
+			Lua.DoFile("Script/bios.lua");
 		}
 
 		public void StartShader(bool DoStart = true) {

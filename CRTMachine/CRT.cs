@@ -90,6 +90,7 @@ namespace CRT {
 
 		public void clear() {
 			Machine.VMem.Clear();
+			Machine.VMem.CaretPosition = 0;
 		}
 	}
 

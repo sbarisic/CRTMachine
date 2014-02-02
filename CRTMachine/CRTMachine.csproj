@@ -32,14 +32,23 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DynamicLua">
+      <HintPath>C:\Users\cartm_000\Desktop\_Libraries\Dynamic Lua\DynamicLua.dll</HintPath>
+    </Reference>
+    <Reference Include="lua">
+      <HintPath>C:\Users\cartm_000\Desktop\_Libraries\Dynamic Lua\lua.dll</HintPath>
+    </Reference>
+    <Reference Include="LuaInterface">
+      <HintPath>C:\Users\cartm_000\Desktop\_Libraries\Dynamic Lua\LuaInterface.dll</HintPath>
+    </Reference>
     <Reference Include="sfmlnet-audio-2">
-      <HintPath>C:\Users\cartm_000\Desktop\_Libraries\SFML 2 .NET\lib\sfmlnet-audio-2.dll</HintPath>
+      <HintPath>C:\Users\cartm_000\Desktop\_Libraries\SFML\bin\sfmlnet-audio-2.dll</HintPath>
     </Reference>
     <Reference Include="sfmlnet-graphics-2">
-      <HintPath>C:\Users\cartm_000\Desktop\_Libraries\SFML 2 .NET\lib\sfmlnet-graphics-2.dll</HintPath>
+      <HintPath>C:\Users\cartm_000\Desktop\_Libraries\SFML\bin\sfmlnet-graphics-2.dll</HintPath>
     </Reference>
     <Reference Include="sfmlnet-window-2">
-      <HintPath>C:\Users\cartm_000\Desktop\_Libraries\SFML 2 .NET\lib\sfmlnet-window-2.dll</HintPath>
+      <HintPath>C:\Users\cartm_000\Desktop\_Libraries\SFML\bin\sfmlnet-window-2.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -119,24 +128,11 @@
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="C:\Users\cartm_000\Desktop\_Libraries\Dynamic Lua\DynamicLua\DynamicLua.csproj">
-      <Project>{c23db83e-4176-455e-add0-b138b80ce2f3}</Project>
-      <Name>DynamicLua</Name>
-    </ProjectReference>
-    <ProjectReference Include="C:\Users\cartm_000\Desktop\_Libraries\Dynamic Lua\lua514\lua514.vcxproj">
-      <Project>{0a82cc4c-9a27-461c-8db0-a65ac6393748}</Project>
-      <Name>lua</Name>
-    </ProjectReference>
-    <ProjectReference Include="C:\Users\cartm_000\Desktop\_Libraries\Dynamic Lua\LuaInterface\LuaInterface.csproj">
-      <Project>{f55cabbb-4108-4a39-94e1-581fd46dc021}</Project>
-      <Name>LuaInterface</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>del $(OutDir)*.pdb
-del $(OutDir)*.config</PostBuildEvent>
+del $(OutDir)*.config
+del $(OutDir)*.manifest</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>del $(OutDir)*.dll</PreBuildEvent>
